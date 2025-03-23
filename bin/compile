@@ -44,46 +44,50 @@ fi
 
 # Copy the Procfile into root
 cp "${SOURCE_PROCFILE}" "${DEST_PROCFILE}"
-
 if [[ $? -ne 0 ]]; then
     echo "❌ FAILED to copy Procfile from '${SOURCE_PROCFILE}'" | indent
     exit 1
-fi
-
-echo "✅ Copied '${PROCFILE}' as root-level Procfile successfully" | indent
-
-# Optional: copy app.json
-APP_DIR=$(dirname "${SOURCE_PROCFILE}")
-APP_JSON_SRC="${APP_DIR}/app.json"
-
-if [[ -f "${APP_JSON_SRC}" ]]; then
-    cp "${APP_JSON_SRC}" "${BUILD_DIR}/app.json"
-    echo "✅ Copied ${APP_JSON_SRC} as app.json successfully" | indent
 else
-    echo "ℹ️ No app.json found at ${APP_JSON_SRC}" | indent
+    echo "✅ Copied '${PROCFILE}' as root-level Procfile successfully" | indent
 fi
 
-echo "---- End of multi-procfile debug ----" | indent
+APP_DIR=$(dirname "${SOURCE_PROCFILE}")
 
-# Copy package.json and package-lock.json
+echo "📁 Scanning contents of APP_DIR (${APP_DIR}):" | indent
+ls -al "${APP_DIR}" | indent
+
+# Copy package.json
 if [[ -f "${APP_DIR}/package.json" ]]; then
     echo "📦 Copying package.json from ${APP_DIR}" | indent
     cp "${APP_DIR}/package.json" "${BUILD_DIR}/package.json"
+else
+    echo "⚠️ package.json not found in ${APP_DIR}" | indent
 fi
 
+# Copy package-lock.json
 if [[ -f "${APP_DIR}/package-lock.json" ]]; then
     echo "📦 Copying package-lock.json from ${APP_DIR}" | indent
     cp "${APP_DIR}/package-lock.json" "${BUILD_DIR}/package-lock.json"
+else
+    echo "⚠️ package-lock.json not found in ${APP_DIR}" | indent
 fi
 
-# Copy tsconfig if needed
+# Copy tsconfig.json
 if [[ -f "${APP_DIR}/tsconfig.json" ]]; then
     echo "🛠️ Copying tsconfig.json from ${APP_DIR}" | indent
     cp "${APP_DIR}/tsconfig.json" "${BUILD_DIR}/tsconfig.json"
+else
+    echo "ℹ️ No tsconfig.json found in ${APP_DIR}" | indent
 fi
 
-# Copy app.json if it exists
+# Copy app.json
 if [[ -f "${APP_DIR}/app.json" ]]; then
     echo "🧩 Copying app.json from ${APP_DIR}" | indent
     cp "${APP_DIR}/app.json" "${BUILD_DIR}/app.json"
+    echo "✅ Copied app.json successfully" | indent
+else
+    echo "ℹ️ No app.json found in ${APP_DIR}" | indent
 fi
+
+echo "✅ Multi-procfile setup completed. Handing off to next buildpack..." | indent
+echo "---------------------------------------------------------------" | indent

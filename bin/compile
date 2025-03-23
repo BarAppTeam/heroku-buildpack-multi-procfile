@@ -13,30 +13,36 @@ echo "BUILD_DIR = ${BUILD_DIR}" | indent
 echo "CACHE_DIR = ${CACHE_DIR}" | indent
 echo "ENV_DIR   = ${ENV_DIR}" | indent
 
-# Try to read the PROCFILE path from the Heroku ENV
 echo "Reading PROCFILE from ${ENV_DIR}/PROCFILE..." | indent
 PROCFILE=$(cat "${ENV_DIR}/PROCFILE" 2>/dev/null)
 
 if [[ -z "${PROCFILE}" ]]; then
     echo "❌ PROCFILE environment variable was not set or is empty. Aborting." | indent
-    echo "To fix: run 'heroku config:set PROCFILE=backend/Procfile --app your-app-name'" | indent
+    echo "ℹ️ To fix: heroku config:set PROCFILE=sockets/Procfile" | indent
     exit 1
 fi
 
 echo "✅ Detected PROCFILE = '${PROCFILE}'" | indent
 
-# Ensure the source file exists before copying
 SOURCE_PROCFILE="${BUILD_DIR}/${PROCFILE}"
 DEST_PROCFILE="${BUILD_DIR}/Procfile"
 
-echo "Looking for source Procfile at: ${SOURCE_PROCFILE}" | indent
+echo "🔍 Checking if file exists: ${SOURCE_PROCFILE}" | indent
 
 if [ ! -f "${SOURCE_PROCFILE}" ]; then
-    echo "❌ ERROR: File '${SOURCE_PROCFILE}' does not exist. Aborting." | indent
+    echo "❌ ERROR: '${SOURCE_PROCFILE}' does not exist." | indent
+
+    echo "📁 Listing contents of '${BUILD_DIR}':" | indent
+    ls -al "${BUILD_DIR}" | indent
+
+    echo "📁 Listing contents of '${BUILD_DIR}/$(dirname "${PROCFILE}")':" | indent
+    ls -al "${BUILD_DIR}/$(dirname "${PROCFILE}")" 2>/dev/null || echo "⚠️ Folder does not exist" | indent
+
+    echo "⛔ Aborting because the Procfile could not be found." | indent
     exit 1
 fi
 
-# Copy the actual Procfile into root
+# Copy the Procfile into root
 cp "${SOURCE_PROCFILE}" "${DEST_PROCFILE}"
 
 if [[ $? -ne 0 ]]; then
@@ -46,7 +52,7 @@ fi
 
 echo "✅ Copied '${PROCFILE}' as root-level Procfile successfully" | indent
 
-# Optional: Copy over app.json if it exists in the same folder
+# Optional: copy app.json
 APP_DIR=$(dirname "${SOURCE_PROCFILE}")
 APP_JSON_SRC="${APP_DIR}/app.json"
 

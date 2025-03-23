@@ -8,25 +8,53 @@ BUILD_DIR=$1
 CACHE_DIR=$2
 ENV_DIR=$3
 
-PROCFILE=$(cat "${ENV_DIR}/PROCFILE")
+echo "---- Multi-procfile buildpack debug info ----" | indent
+echo "BUILD_DIR = ${BUILD_DIR}" | indent
+echo "CACHE_DIR = ${CACHE_DIR}" | indent
+echo "ENV_DIR   = ${ENV_DIR}" | indent
+
+# Try to read the PROCFILE path from the Heroku ENV
+echo "Reading PROCFILE from ${ENV_DIR}/PROCFILE..." | indent
+PROCFILE=$(cat "${ENV_DIR}/PROCFILE" 2>/dev/null)
 
 if [[ -z "${PROCFILE}" ]]; then
-    echo "PROCFILE was not set. Aborting" | indent
+    echo "❌ PROCFILE environment variable was not set or is empty. Aborting." | indent
+    echo "To fix: run 'heroku config:set PROCFILE=backend/Procfile --app your-app-name'" | indent
     exit 1
 fi
 
-cp "${BUILD_DIR}/${PROCFILE}" "${BUILD_DIR}/Procfile"
+echo "✅ Detected PROCFILE = '${PROCFILE}'" | indent
 
-if ! [ $? ]; then
-    echo "FAILED to copy a Procfile" | indent
+# Ensure the source file exists before copying
+SOURCE_PROCFILE="${BUILD_DIR}/${PROCFILE}"
+DEST_PROCFILE="${BUILD_DIR}/Procfile"
+
+echo "Looking for source Procfile at: ${SOURCE_PROCFILE}" | indent
+
+if [ ! -f "${SOURCE_PROCFILE}" ]; then
+    echo "❌ ERROR: File '${SOURCE_PROCFILE}' does not exist. Aborting." | indent
     exit 1
 fi
 
-echo "Copied ${PROCFILE} as Procfile successfully" | indent
+# Copy the actual Procfile into root
+cp "${SOURCE_PROCFILE}" "${DEST_PROCFILE}"
 
-APP_DIR=$(dirname "${BUILD_DIR}/${PROCFILE}")
-
-if [[ -f "${APP_DIR}/app.json" ]]; then
-    cp "${APP_DIR}/app.json" "${BUILD_DIR}/app.json"
-    echo "Copied ${APP_DIR}/app.json as app.json successfully" | indent
+if [[ $? -ne 0 ]]; then
+    echo "❌ FAILED to copy Procfile from '${SOURCE_PROCFILE}'" | indent
+    exit 1
 fi
+
+echo "✅ Copied '${PROCFILE}' as root-level Procfile successfully" | indent
+
+# Optional: Copy over app.json if it exists in the same folder
+APP_DIR=$(dirname "${SOURCE_PROCFILE}")
+APP_JSON_SRC="${APP_DIR}/app.json"
+
+if [[ -f "${APP_JSON_SRC}" ]]; then
+    cp "${APP_JSON_SRC}" "${BUILD_DIR}/app.json"
+    echo "✅ Copied ${APP_JSON_SRC} as app.json successfully" | indent
+else
+    echo "ℹ️ No app.json found at ${APP_JSON_SRC}" | indent
+fi
+
+echo "---- End of multi-procfile debug ----" | indent

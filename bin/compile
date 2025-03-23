@@ -89,5 +89,19 @@ else
     echo "ℹ️ No app.json found in ${APP_DIR}" | indent
 fi
 
+
+echo "📂 Dumping final build directory before Node.js buildpack runs..." | indent
+echo "📁 Top-level contents of $BUILD_DIR:" | indent
+ls -al "$BUILD_DIR" | indent
+
+echo "📁 Nested view of key folders:" | indent
+[[ -d "$BUILD_DIR/src" ]] && echo "✅ src/" | indent && ls -al "$BUILD_DIR/src" | indent
+[[ -d "$BUILD_DIR/common" ]] && echo "✅ common/" | indent && ls -al "$BUILD_DIR/common" | indent
+[[ -f "$BUILD_DIR/tsconfig.json" ]] && echo "✅ tsconfig.json exists" | indent
+[[ -f "$BUILD_DIR/package.json" ]] && echo "✅ package.json exists" | indent
+
+echo "✅ Custom buildpack setup complete. Handing off to Node.js buildpack..." | indent
+
+
 echo "✅ Multi-procfile setup completed. Handing off to next buildpack..." | indent
 echo "---------------------------------------------------------------" | indent

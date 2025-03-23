@@ -89,21 +89,5 @@ else
     echo "ℹ️ No app.json found in ${APP_DIR}" | indent
 fi
 
-# Copy source files
-if [[ -d "${APP_DIR}/src" ]]; then
-    echo "📁 Copying src/ from ${APP_DIR} to ${BUILD_DIR}" | indent
-    cp -r "${APP_DIR}/src" "${BUILD_DIR}/src"
-else
-    echo "❌ ERROR: src/ directory not found in ${APP_DIR}" | indent
-    exit 1
-fi
-
-if [[ -d "${BUILD_DIR}/../common" ]]; then
-  echo "📦 Copying common/ into build directory..." | indent
-  cp -r "${BUILD_DIR}/../common" "${BUILD_DIR}/common"
-else
-  echo "⚠️ common/ directory not found in root, skipping" | indent
-fi
-
 echo "✅ Multi-procfile setup completed. Handing off to next buildpack..." | indent
 echo "---------------------------------------------------------------" | indent

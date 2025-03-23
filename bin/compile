@@ -98,5 +98,12 @@ else
     exit 1
 fi
 
+if [[ -d "${BUILD_DIR}/../common" ]]; then
+  echo "📦 Copying common/ into build directory..." | indent
+  cp -r "${BUILD_DIR}/../common" "${BUILD_DIR}/common"
+else
+  echo "⚠️ common/ directory not found in root, skipping" | indent
+fi
+
 echo "✅ Multi-procfile setup completed. Handing off to next buildpack..." | indent
 echo "---------------------------------------------------------------" | indent

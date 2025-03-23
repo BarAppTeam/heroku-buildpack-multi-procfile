@@ -64,3 +64,26 @@ else
 fi
 
 echo "---- End of multi-procfile debug ----" | indent
+
+# Copy package.json and package-lock.json
+if [[ -f "${APP_DIR}/package.json" ]]; then
+    echo "📦 Copying package.json from ${APP_DIR}" | indent
+    cp "${APP_DIR}/package.json" "${BUILD_DIR}/package.json"
+fi
+
+if [[ -f "${APP_DIR}/package-lock.json" ]]; then
+    echo "📦 Copying package-lock.json from ${APP_DIR}" | indent
+    cp "${APP_DIR}/package-lock.json" "${BUILD_DIR}/package-lock.json"
+fi
+
+# Copy tsconfig if needed
+if [[ -f "${APP_DIR}/tsconfig.json" ]]; then
+    echo "🛠️ Copying tsconfig.json from ${APP_DIR}" | indent
+    cp "${APP_DIR}/tsconfig.json" "${BUILD_DIR}/tsconfig.json"
+fi
+
+# Copy app.json if it exists
+if [[ -f "${APP_DIR}/app.json" ]]; then
+    echo "🧩 Copying app.json from ${APP_DIR}" | indent
+    cp "${APP_DIR}/app.json" "${BUILD_DIR}/app.json"
+fi
